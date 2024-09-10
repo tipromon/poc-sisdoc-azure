@@ -3,14 +3,15 @@ from pathlib import Path
 import streamlit as st
 import streamlit_authenticator as stauth
 import openai
+from azure.search.documents.indexes import SearchIndexClient
+from azure.core.credentials import AzureKeyCredential
 
-# Usar st.secrets para acessar as variáveis de ambiente
+# Carregar as variáveis diretamente do Streamlit Secrets
 aoai_endpoint = st.secrets["AZURE_OPENAI_ENDPOINT"]
 aoai_key = st.secrets["AZURE_OPENAI_API_KEY"]
 aoai_deployment_name = st.secrets["AZURE_OPENAI_CHAT_COMPLETIONS_DEPLOYMENT_NAME"]
 search_endpoint = st.secrets["AZURE_SEARCH_SERVICE_ENDPOINT"]
 search_key = st.secrets["AZURE_SEARCH_SERVICE_ADMIN_KEY"]
-search_index_name = st.secrets["SEARCH_INDEX_NAME"]
 storage_account = st.secrets["AZURE_STORAGE_ACCOUNT"]
 storage_container = st.secrets["AZURE_STORAGE_CONTAINER"]
 
@@ -18,23 +19,42 @@ storage_container = st.secrets["AZURE_STORAGE_CONTAINER"]
 ROLE_INFORMATION = """
 Instruções para o Assistente de IA da Promon Engenharia:
 
-Contexto e Propósito: Você é um assistente de inteligência artificial integrado à Promon Engenharia, com a finalidade de auxiliar os usuários na consulta e extração de informações dos documentos relacionados ao projeto da Vopak. Este projeto refere-se à Expansão da Área 6 no terminal da Vopak, localizado em Alemoa, Santos, SP, Brasil.
+Contexto e Propósito:
+Você é um assistente de inteligência artificial integrado à Promon Engenharia, com a função de auxiliar os usuários na consulta e extração de informações dos diversos documentos indexados da empresa. Esses documentos podem abranger diferentes projetos, diretrizes internas, normativos de recursos humanos e demais documentos relevantes para o funcionamento e operação da Promon.
 
-Função Principal: Seu papel é fornecer respostas precisas e relevantes com base nos conteúdos disponíveis nos documentos indexados do projeto. Essas informações podem incluir detalhes técnicos, cronogramas, especificações, plantas, relatórios e outros dados pertinentes ao empreendimento.
+Função Principal:
+Seu papel é fornecer respostas precisas e relevantes com base nas informações disponíveis nos documentos internos da Promon. Esses documentos podem incluir detalhes técnicos de projetos, cronogramas, especificações, plantas, relatórios, diretrizes de recursos humanos, normativos internos, manuais de procedimentos e outros dados pertinentes à empresa.
 
 Diretrizes para Respostas:
 
-- Consultas Baseadas em Documentos:
-  - Todas as respostas devem ser baseadas exclusivamente nas informações contidas nos documentos do projeto aos quais você tem acesso. Caso a consulta do usuário esteja relacionada a informações específicas, como datas, detalhes técnicos ou instruções de construção, consulte os documentos e forneça uma resposta clara e concisa.
+Consultas Baseadas em Documentos:
 
-- Escopo do Projeto:
-  - Este assistente é limitado a fornecer informações apenas sobre o projeto de Expansão da Área 6. Questões fora deste escopo devem ser respondidas com: "Não tenho acesso a essa informação".
+Todas as respostas devem ser baseadas exclusivamente nas informações contidas nos documentos internos aos quais você tem acesso. Ao receber uma consulta, identifique o índice ou pasta correspondente (projetos, diretrizes de RH, normativos, etc.) e forneça uma resposta clara e concisa baseada no conteúdo dos documentos disponíveis.
+Abrangência dos Projetos e Documentos:
 
-- Respostas Estruturadas:
-  - Estruture suas respostas de forma clara, apresentando informações relevantes de maneira organizada e fácil de entender. Utilize seções, listas ou tópicos numerados, quando necessário, para melhorar a legibilidade.
+Você tem acesso a documentos relacionados a diversos projetos e departamentos da Promon, incluindo mas não se limitando a:
+Projetos Técnicos: Forneça informações sobre detalhes técnicos, cronogramas, especificações e demais dados relevantes.
+Normativos e Diretrizes Internas: Auxilie com informações sobre diretrizes de recursos humanos, normas internas, políticas da empresa e manuais de procedimentos.
+Caso a consulta do usuário se refira a informações fora dos documentos disponíveis ou fora do escopo da sua atuação, responda com: "Não tenho acesso a essa informação".
+Respostas Estruturadas:
 
-- Ausência de Informações:
-  - Se a informação solicitada pelo usuário não estiver disponível nos documentos que você pode consultar, responda de forma direta: "Não tenho acesso a essa informação".
+Estruture suas respostas de forma clara, apresentando as informações de maneira organizada e fácil de entender. Utilize listas, tópicos numerados ou seções separadas quando necessário para facilitar a compreensão do usuário.
+Ausência de Informações:
+
+Se a informação solicitada pelo usuário não estiver disponível nos documentos que você pode consultar, ou não houver dados relacionados ao tema solicitado, responda diretamente com: "Não tenho acesso a essa informação".
+Exemplos de Consultas:
+
+Exemplo 1: Usuário: "Quais são as normas de segurança vigentes no projeto de Expansão da Área 6?"
+Resposta: "As normas de segurança para o projeto de Expansão da Área 6 incluem o uso obrigatório de EPIs, controle de acesso a áreas restritas e inspeções regulares de equipamentos. Consulte o documento XYZ.pdf, seção 5.2, para mais detalhes."
+
+Exemplo 2: Usuário: "Quais são as políticas de home office da Promon?"
+Resposta: "As políticas de home office da Promon são definidas no documento 'Política de Trabalho Remoto 2024.pdf', que estabelece critérios como elegibilidade, frequência e ferramentas de apoio ao colaborador."
+
+Exemplo 3: Usuário: "Qual é o prazo de entrega previsto para o Projeto XYZ?"
+Resposta: "De acordo com o cronograma presente no documento 'Cronograma_Projeto_XYZ.pdf', a entrega está prevista para junho de 2025."
+
+Considerações Finais:
+Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que o usuário receba as informações mais atualizadas e pertinentes, baseadas exclusivamente nos documentos disponíveis para consulta. Seu objetivo é facilitar o acesso a informações técnicas e administrativas, respeitando sempre os limites de acesso aos conteúdos indexados da Promon Engenharia.
 """
 
 # --- USER AUTHENTICATION ---
@@ -71,6 +91,12 @@ authenticator = stauth.Authenticate(
 # Autenticação do usuário
 name, authentication_status, username = authenticator.login("main")
 
+# Função para carregar índices do Azure AI Search
+def get_available_indexes(search_endpoint, search_key):
+    index_client = SearchIndexClient(endpoint=search_endpoint, credential=AzureKeyCredential(search_key))
+    indexes = index_client.list_indexes()  # Lista todos os índices disponíveis
+    return [index.name for index in indexes]
+
 # Verificar o status da autenticação
 if authentication_status == False:
     st.error("Nome de usuário ou senha incorretos")
@@ -80,23 +106,16 @@ if authentication_status == None:
 
 if authentication_status:
     # --- SE O USUÁRIO ESTIVER AUTENTICADO ---
-    st.title(f"Bem-vindo, {name}!")
+    st.title(f"Bem-vindo, {name}, ao MakrAI - Promon Engenharia!")
 
-    # Função para criar o chat sem dados externos
-    def create_chat_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key):
-        client = openai.AzureOpenAI(
-            api_key=aoai_key,
-            api_version="2024-06-01",
-            azure_endpoint=aoai_endpoint
-        )
-        return client.chat.completions.create(
-            model=aoai_deployment_name,
-            messages=[{"role": m["role"], "content": m["content"]} for m in messages],
-            stream=True
-        )
+    # Carregar índices disponíveis do Azure AI Search
+    available_indexes = get_available_indexes(search_endpoint, search_key)
+
+    # Dropdown para selecionar o índice
+    selected_index = st.sidebar.selectbox("Selecione o índice do Azure AI Search", options=available_indexes)
 
     # Função para criar o chat com dados do Azure AI Search
-    def create_chat_with_data_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key, search_endpoint, search_key, search_index_name):
+    def create_chat_with_data_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
         client = openai.AzureOpenAI(
             api_key=aoai_key,
             api_version="2024-06-01",
@@ -112,7 +131,7 @@ if authentication_status:
                         "type": "azure_search",
                         "parameters": {
                             "endpoint": search_endpoint,
-                            "index_name": search_index_name,
+                            "index_name": selected_index,  # Usar o índice selecionado pelo usuário
                             "semantic_configuration": "default",
                             "query_type": "semantic",
                             "fields_mapping": {},
@@ -131,7 +150,7 @@ if authentication_status:
         )
 
     # Função para lidar com a entrada do chat e gerar resposta
-    def handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, search_index_name, model_type):
+    def handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -142,18 +161,12 @@ if authentication_status:
             full_response = ""
             documents_used = []
 
-            if model_type == "Usar modelo GPT-4 base":
-                for response in create_chat_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key):
-                    if response.choices:
-                        full_response += (response.choices[0].delta.content or "")
-                        message_placeholder.markdown(full_response + "▌")
-            else:
-                for response in create_chat_with_data_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key, search_endpoint, search_key, search_index_name):
-                    if response.choices:
-                        full_response += (response.choices[0].delta.content or "")
-                        if hasattr(response.choices[0], 'data') and "documents" in response.choices[0].data:
-                            documents_used = response.choices[0].data["documents"]
-                        message_placeholder.markdown(full_response + "▌")
+            for response in create_chat_with_data_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
+                if response.choices:
+                    full_response += (response.choices[0].delta.content or "")
+                    if hasattr(response.choices[0], 'data') and "documents" in response.choices[0].data:
+                        documents_used = response.choices[0].data["documents"]
+                    message_placeholder.markdown(full_response + "▌")
 
             # Gerar links clicáveis para os documentos utilizados, caso existam
             if documents_used:
@@ -169,15 +182,12 @@ if authentication_status:
     # Função principal do Streamlit
     def main():
         st.write("""
-        # Chatbot Promon Engenharia - Projeto Vopak
+        # MakrAI - Promon Engenharia
         """)
 
         # Inicializar o histórico de mensagens
         if "messages" not in st.session_state:
             st.session_state.messages = []
-
-        # Selecionar o tipo de modelo
-        model_type = st.sidebar.radio(label="Selecione o tipo de modelo", options=["Usar modelo GPT-4 base", "Usar modelo GPT-4 com Azure AI Search"])
 
         # Exibir o histórico de mensagens
         for message in st.session_state.messages:
@@ -186,10 +196,16 @@ if authentication_status:
 
         # Caixa de entrada do chat
         if prompt := st.chat_input("Digite sua pergunta:"):
-            handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, search_index_name, model_type)
+            handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index)
 
     if __name__ == "__main__":
         main()
+
+    # Adicionar disclaimer no rodapé
+    st.sidebar.markdown("""
+    **Disclaimer**:
+    O "MakrAI" tem como único objetivo disponibilizar dados que sirvam como um meio de orientação e apoio; não constitui, porém, uma recomendação vinculante pois não representam uma análise personalizada para um Cliente e/ou Projeto específico, e, portanto, não devem ser utilizados como única fonte de informação na tomada de decisões pelos profissionais Promon.
+    """)
 
     # Botão de logout
     authenticator.logout("Logout", "sidebar")
