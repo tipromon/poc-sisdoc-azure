@@ -89,6 +89,12 @@ def get_available_indexes(search_endpoint, search_key):
     indexes = index_client.list_indexes()  # Lista todos os índices disponíveis
     return [index.name for index in indexes]
 
+# Mapeamento entre os nomes reais dos índices e os nomes amigáveis
+index_name_mapping = {
+    "epotl-dp": "E.POTL001 - Projeto GLP/C5+",
+    "vopak-dp": "E.VPAK001 - VOPAK",
+    "recursos-humanos": "Relações Humanas"
+
 # Verificar o status da autenticação
 if authentication_status == False:
     st.error("Nome de usuário ou senha incorretos")
