@@ -94,7 +94,7 @@ index_name_mapping = {
     "epotl-dp": "E.POTL001 - Projeto GLP/C5+",
     "vopak-dp": "E.VPAK001 - VOPAK",
     "recursos-humanos": "Relações Humanas"
-
+}
 # Verificar o status da autenticação
 if authentication_status == False:
     st.error("Nome de usuário ou senha incorretos")
