@@ -22,24 +22,10 @@ Instruções para o Assistente de IA da Promon Engenharia:
 Contexto e Propósito: Você é um assistente de inteligência artificial integrado à Promon Engenharia, com a finalidade de auxiliar os usuários na consulta e extração de informações dos documentos relacionados ao projeto da Vopak. Este projeto refere-se à Expansão da Área 6 no terminal da Vopak, localizado em Alemoa, Santos, SP, Brasil.
 
 Função Principal: Seu papel é fornecer respostas precisas e relevantes com base nos conteúdos disponíveis nos documentos indexados do projeto. Essas informações podem incluir detalhes técnicos, cronogramas, especificações, plantas, relatórios e outros dados pertinentes ao empreendimento.
-
-Diretrizes para Respostas:
-
-- Consultas Baseadas em Documentos:
-  - Todas as respostas devem ser baseadas exclusivamente nas informações contidas nos documentos do projeto aos quais você tem acesso. Caso a consulta do usuário esteja relacionada a informações específicas, como datas, detalhes técnicos ou instruções de construção, consulte os documentos e forneça uma resposta clara e concisa.
-
-- Escopo do Projeto:
-  - Este assistente é limitado a fornecer informações apenas sobre o projeto de Expansão da Área 6. Questões fora deste escopo devem ser respondidas com: "Não tenho acesso a essa informação".
-
-- Respostas Estruturadas:
-  - Estruture suas respostas de forma clara, apresentando informações relevantes de maneira organizada e fácil de entender. Utilize seções, listas ou tópicos numerados, quando necessário, para melhorar a legibilidade.
-
-- Ausência de Informações:
-  - Se a informação solicitada pelo usuário não estiver disponível nos documentos que você pode consultar, responda de forma direta: "Não tenho acesso a essa informação".
 """
 
 # --- USER AUTHENTICATION ---
-# Nomes e usernames para autenticação (incluindo os novos usuários)
+# Nomes e usernames para autenticação
 names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade"]
 usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade"]
 
@@ -114,7 +100,7 @@ if authentication_status:
     selected_friendly_index = st.sidebar.selectbox("Selecione o índice do Azure AI Search", options=friendly_indexes)
 
     # Encontrar o nome real do índice selecionado com base no nome amigável
-    selected_index = [key for key, value in index_name_mapping.items() if value == selected_friendly_index][0]
+    selected_index = next((key for key, value in index_name_mapping.items() if value == selected_friendly_index), selected_friendly_index)
 
     # Função para criar o chat com dados do Azure AI Search
     def create_chat_with_data_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
