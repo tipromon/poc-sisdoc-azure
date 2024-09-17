@@ -1,24 +1,19 @@
-import os
 import pickle
 from pathlib import Path
 import streamlit as st
 import streamlit_authenticator as stauth
-from dotenv import load_dotenv
 import openai
 from azure.search.documents.indexes import SearchIndexClient
 from azure.core.credentials import AzureKeyCredential
 
-# Carregar as variáveis do arquivo .env
-load_dotenv()
-
-# Carregar variáveis de ambiente
-aoai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-aoai_key = os.getenv("AZURE_OPENAI_API_KEY")
-aoai_deployment_name = os.getenv("AZURE_OPENAI_CHAT_COMPLETIONS_DEPLOYMENT_NAME")
-search_endpoint = os.getenv("AZURE_SEARCH_SERVICE_ENDPOINT")
-search_key = os.getenv("AZURE_SEARCH_SERVICE_ADMIN_KEY")
-storage_account = os.getenv("AZURE_STORAGE_ACCOUNT")
-storage_container = os.getenv("AZURE_STORAGE_CONTAINER")
+# Carregar as variáveis diretamente do Streamlit Secrets
+aoai_endpoint = st.secrets["AZURE_OPENAI_ENDPOINT"]
+aoai_key = st.secrets["AZURE_OPENAI_API_KEY"]
+aoai_deployment_name = st.secrets["AZURE_OPENAI_CHAT_COMPLETIONS_DEPLOYMENT_NAME"]
+search_endpoint = st.secrets["AZURE_SEARCH_SERVICE_ENDPOINT"]
+search_key = st.secrets["AZURE_SEARCH_SERVICE_ADMIN_KEY"]
+storage_account = st.secrets["AZURE_STORAGE_ACCOUNT"]
+storage_container = st.secrets["AZURE_STORAGE_CONTAINER"]
 
 # Instruções detalhadas para o assistente da Promon Engenharia
 ROLE_INFORMATION = """
@@ -44,11 +39,9 @@ Diretrizes para Respostas:
 """
 
 # --- USER AUTHENTICATION ---
-# Nomes e usernames para autenticação
 # Nomes e usernames para autenticação (incluindo os novos usuários)
 names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade"]
 usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade"]
-
 
 # Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
