@@ -95,6 +95,11 @@ index_name_mapping = {
     "vopak-dp": "E.VPAK001 - VOPAK",
     "recursos-humanos": "Relações Humanas"
 }
+
+# Função para obter o nome amigável a partir do nome real do índice
+def get_friendly_index_name(real_index_name):
+    return index_name_mapping.get(real_index_name, real_index_name)
+
 # Verificar o status da autenticação
 if authentication_status == False:
     st.error("Nome de usuário ou senha incorretos")
@@ -104,26 +109,19 @@ if authentication_status == None:
 
 if authentication_status:
     # --- SE O USUÁRIO ESTIVER AUTENTICADO ---
-    st.title(f"Bem-vindo, {name}!")
+    st.title(f"Bem-vindo, {name}, ao MakrAI - Promon Engenharia!")
 
     # Carregar índices disponíveis do Azure AI Search
     available_indexes = get_available_indexes(search_endpoint, search_key)
 
-    # Dropdown para selecionar o índice
-    selected_index = st.sidebar.selectbox("Selecione o índice do Azure AI Search", options=available_indexes)
+    # Criar uma lista de nomes amigáveis a serem exibidos no dropdown
+    friendly_indexes = [get_friendly_index_name(index) for index in available_indexes]
 
-    # Função para criar o chat sem dados externos
-    def create_chat_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key):
-        client = openai.AzureOpenAI(
-            api_key=aoai_key,
-            api_version="2024-06-01",
-            azure_endpoint=aoai_endpoint
-        )
-        return client.chat.completions.create(
-            model=aoai_deployment_name,
-            messages=[{"role": m["role"], "content": m["content"]} for m in messages],
-            stream=True
-        )
+    # Dropdown para selecionar o índice
+    selected_friendly_index = st.sidebar.selectbox("Selecione o índice do Azure AI Search", options=friendly_indexes)
+
+    # Encontrar o nome real do índice selecionado com base no nome amigável
+    selected_index = [key for key, value in index_name_mapping.items() if value == selected_friendly_index][0]
 
     # Função para criar o chat com dados do Azure AI Search
     def create_chat_with_data_completion(aoai_deployment_name, messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
@@ -161,7 +159,7 @@ if authentication_status:
         )
 
     # Função para lidar com a entrada do chat e gerar resposta
-    def handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index, model_type):
+    def handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -172,18 +170,12 @@ if authentication_status:
             full_response = ""
             documents_used = []
 
-            if model_type == "Usar modelo GPT-4 base":
-                for response in create_chat_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key):
-                    if response.choices:
-                        full_response += (response.choices[0].delta.content or "")
-                        message_placeholder.markdown(full_response + "▌")
-            else:
-                for response in create_chat_with_data_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
-                    if response.choices:
-                        full_response += (response.choices[0].delta.content or "")
-                        if hasattr(response.choices[0], 'data') and "documents" in response.choices[0].data:
-                            documents_used = response.choices[0].data["documents"]
-                        message_placeholder.markdown(full_response + "▌")
+            for response in create_chat_with_data_completion(aoai_deployment_name, st.session_state.messages, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index):
+                if response.choices:
+                    full_response += (response.choices[0].delta.content or "")
+                    if hasattr(response.choices[0], 'data') and "documents" in response.choices[0].data:
+                        documents_used = response.choices[0].data["documents"]
+                    message_placeholder.markdown(full_response + "▌")
 
             # Gerar links clicáveis para os documentos utilizados, caso existam
             if documents_used:
@@ -199,15 +191,12 @@ if authentication_status:
     # Função principal do Streamlit
     def main():
         st.write("""
-        # Chatbot Promon Engenharia - Projeto Vopak
+        # MakrAI - Promon Engenharia
         """)
 
         # Inicializar o histórico de mensagens
         if "messages" not in st.session_state:
             st.session_state.messages = []
-
-        # Selecionar o tipo de modelo
-        model_type = st.sidebar.radio(label="Selecione o tipo de modelo", options=["Usar modelo GPT-4 base", "Usar modelo GPT-4 com Azure AI Search"])
 
         # Exibir o histórico de mensagens
         for message in st.session_state.messages:
@@ -216,10 +205,16 @@ if authentication_status:
 
         # Caixa de entrada do chat
         if prompt := st.chat_input("Digite sua pergunta:"):
-            handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index, model_type)
+            handle_chat_prompt(prompt, aoai_deployment_name, aoai_endpoint, aoai_key, search_endpoint, search_key, selected_index)
 
     if __name__ == "__main__":
         main()
+
+    # Adicionar disclaimer no rodapé
+    st.sidebar.markdown("""
+    **Disclaimer**:
+    O "MakrAI" tem como único objetivo disponibilizar dados que sirvam como um meio de orientação e apoio; não constitui, porém, uma recomendação vinculante pois não representam uma análise personalizada para um Cliente e/ou Projeto específico, e, portanto, não devem ser utilizados como única fonte de informação na tomada de decisões pelos profissionais Promon.
+    """)
 
     # Botão de logout
     authenticator.logout("Logout", "sidebar")
