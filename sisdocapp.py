@@ -26,8 +26,8 @@ Função Principal: Seu papel é fornecer respostas precisas e relevantes com ba
 
 # --- USER AUTHENTICATION ---
 # Nomes e usernames para autenticação
-names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade"]
-usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade"]
+names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia"]
+usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia"]
 
 # Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
@@ -48,6 +48,8 @@ credentials = {
         usernames[8]: {"name": names[8], "password": hashed_passwords[8]},
         usernames[9]: {"name": names[9], "password": hashed_passwords[9]},
         usernames[10]: {"name": names[10], "password": hashed_passwords[10]},
+        usernames[11]: {"name": names[11], "password": hashed_passwords[11]},
+        usernames[12]: {"name": names[12], "password": hashed_passwords[12]}
     }
 }
 
