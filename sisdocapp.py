@@ -123,7 +123,7 @@ if authentication_status == None:
 
 if authentication_status:
     # --- SE O USUÁRIO ESTIVER AUTENTICADO ---
-    st.title(f"Bem-vindo, {name}, ao MakrAI - Promon Engenharia!")
+    st.title(f"Bem-vindo, {name}, ao MakrAI!")
 
     # Carregar índices disponíveis do Azure AI Search
     available_indexes = get_available_indexes(search_endpoint, search_key)
@@ -204,9 +204,6 @@ if authentication_status:
 
     # Função principal do Streamlit
     def main():
-        st.write("""
-        # MakrAI - Promon Engenharia
-        """)
 
         # Inicializar o histórico de mensagens
         if "messages" not in st.session_state:
