@@ -60,8 +60,8 @@ Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que 
 
 # --- USER AUTHENTICATION ---
 # Nomes e usernames para autenticação
-names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia"]
-usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia"]
+names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira"]
+usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira"]
 
 # Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
@@ -82,7 +82,10 @@ credentials = {
         usernames[8]: {"name": names[8], "password": hashed_passwords[8]},
         usernames[9]: {"name": names[9], "password": hashed_passwords[9]},
         usernames[10]: {"name": names[10], "password": hashed_passwords[10]},
-        usernames[11]: {"name": names[11], "password": hashed_passwords[11]},  # Este é o último índice
+        usernames[11]: {"name": names[11], "password": hashed_passwords[11]},
+        usernames[12]: {"name": names[12], "password": hashed_passwords[12]},
+        usernames[13]: {"name": names[13], "password": hashed_passwords[13]},
+        usernames[14]: {"name": names[14], "password": hashed_passwords[14]},
     }
 }
 
