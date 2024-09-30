@@ -60,8 +60,8 @@ Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que 
 
 # --- USER AUTHENTICATION ---
 # Nomes e usernames para autenticação
-names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", "Hellen Vitali", "Rosana Bretzel"]
-usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", "brufino", "hvitali", "rbretzel"]
+names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", "Hellen Vitali", "Rosana Bretzel", "Andre Hiroshi"]
+usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", "brufino", "hvitali", "rbretzel", "ahiroshi"]
 
 # Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
@@ -90,6 +90,7 @@ credentials = {
         usernames[16]: {"name": names[16], "password": hashed_passwords[16]},
         usernames[17]: {"name": names[17], "password": hashed_passwords[17]},
         usernames[18]: {"name": names[18], "password": hashed_passwords[18]},
+        usernames[19]: {"name": names[19], "password": hashed_passwords[19]}
     }
 }
 
