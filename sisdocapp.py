@@ -88,8 +88,7 @@ credentials = {
         usernames[14]: {"name": names[14], "password": hashed_passwords[14]},
         usernames[15]: {"name": names[15], "password": hashed_passwords[15]},
         usernames[16]: {"name": names[16], "password": hashed_passwords[16]},
-        usernames[17]: {"name": names[17], "password": hashed_passwords[17]},
-        usernames[18]: {"name": names[18], "password": hashed_passwords[18]}        
+        usernames[17]: {"name": names[17], "password": hashed_passwords[17]}
     }
 }
 
