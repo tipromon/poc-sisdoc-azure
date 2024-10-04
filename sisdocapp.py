@@ -57,11 +57,36 @@ Considerações Finais:
 Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que o usuário receba as informações mais atualizadas e pertinentes, baseadas exclusivamente nos documentos disponíveis para consulta. Seu objetivo é facilitar o acesso a informações técnicas e administrativas, respeitando sempre os limites de acesso aos conteúdos indexados da Promon Engenharia.
 
 """
+# --- USER AUTHENTICATION ---
+# Nomes e usernames para autenticação
+names = ["Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", 
+         "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", 
+         "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", 
+         "Hellen Vitali", "Rosana Bretzel", "Maria Araujo"]
 
-# Carregar o arquivo de senhas hasheadas
+usernames = ["mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", 
+             "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", 
+             "brufino", "hvitali", "rbretzel", "maraujo"]
+
+# Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
 with file_path.open("rb") as file:
-    credentials = pickle.load(file)
+    hashed_passwords = pickle.load(file)
+
+# Verifique se o número de nomes, usernames e senhas hasheadas são iguais
+if not (len(names) == len(usernames) == len(hashed_passwords)):
+    st.error("As listas 'names', 'usernames' e 'hashed_passwords' precisam ter o mesmo número de elementos.")
+    st.stop()
+
+# Configurar as credenciais de autenticação
+credentials = {
+    "usernames": {
+        usernames[i]: {
+            "name": names[i],
+            "password": hashed_passwords[i]
+        } for i in range(len(usernames))
+    }
+}
 
 # Criar o objeto de autenticação
 authenticator = stauth.Authenticate(
