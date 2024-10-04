@@ -60,35 +60,36 @@ Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que 
 
 # --- USER AUTHENTICATION ---
 # Nomes e usernames para autenticação
-names = ["Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", "Hellen Vitali", "Rosana Bretzel", "Maria Araújo"]
-usernames = ["mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", "brufino", "hvitali", "rbretzel", "maraujo"]
+names = ["Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", 
+         "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", 
+         "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", 
+         "Hellen Vitali", "Rosana Bretzel", "Maria Araújo"]
+
+usernames = ["mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", 
+             "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", 
+             "brufino", "hvitali", "rbretzel", "maraujo"]
+
+# Gerar emails fictícios
+emails = [f"{username}@example.com" for username in usernames]
 
 # Carregar as senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
 with file_path.open("rb") as file:
     hashed_passwords = pickle.load(file)
 
-# Configurar as credenciais de autenticação
+# Verifique se as listas estão sincronizadas
+if not (len(names) == len(usernames) == len(hashed_passwords) == len(emails)):
+    st.error("As listas 'names', 'usernames', 'emails' e 'hashed_passwords' precisam ter o mesmo número de elementos.")
+    st.stop()
+
+# Configurar as credenciais de autenticação com emails
 credentials = {
     "usernames": {
-        usernames[0]: {"name": names[0], "password": hashed_passwords[0]},
-        usernames[1]: {"name": names[1], "password": hashed_passwords[1]},
-        usernames[2]: {"name": names[2], "password": hashed_passwords[2]},
-        usernames[3]: {"name": names[3], "password": hashed_passwords[3]},
-        usernames[4]: {"name": names[4], "password": hashed_passwords[4]},
-        usernames[5]: {"name": names[5], "password": hashed_passwords[5]},
-        usernames[6]: {"name": names[6], "password": hashed_passwords[6]},
-        usernames[7]: {"name": names[7], "password": hashed_passwords[7]},
-        usernames[8]: {"name": names[8], "password": hashed_passwords[8]},
-        usernames[9]: {"name": names[9], "password": hashed_passwords[9]},
-        usernames[10]: {"name": names[10], "password": hashed_passwords[10]},
-        usernames[11]: {"name": names[11], "password": hashed_passwords[11]},
-        usernames[12]: {"name": names[12], "password": hashed_passwords[12]},
-        usernames[13]: {"name": names[13], "password": hashed_passwords[13]},
-        usernames[14]: {"name": names[14], "password": hashed_passwords[14]},
-        usernames[15]: {"name": names[15], "password": hashed_passwords[15]},
-        usernames[16]: {"name": names[16], "password": hashed_passwords[16]},
-        usernames[17]: {"name": names[17], "password": hashed_passwords[17]}
+        usernames[i]: {
+            "name": names[i],
+            "email": emails[i],  # Adicionando email fictício
+            "password": hashed_passwords[i]
+        } for i in range(len(usernames))
     }
 }
 
