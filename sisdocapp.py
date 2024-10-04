@@ -58,40 +58,10 @@ Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que 
 
 """
 
-# --- USER AUTHENTICATION ---
-# Nomes e usernames para autenticação
-names = ["Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", 
-         "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", 
-         "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", 
-         "Hellen Vitali", "Rosana Bretzel", "Maria Araújo"]
-
-usernames = ["mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", 
-             "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", 
-             "brufino", "hvitali", "rbretzel", "maraujo"]
-
-# Gerar emails fictícios
-emails = [f"{username}@example.com" for username in usernames]
-
-# Carregar as senhas hasheadas
+# Carregar o arquivo de senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
 with file_path.open("rb") as file:
-    hashed_passwords = pickle.load(file)
-
-# Verifique se as listas estão sincronizadas
-if not (len(names) == len(usernames) == len(hashed_passwords) == len(emails)):
-    st.error("As listas 'names', 'usernames', 'emails' e 'hashed_passwords' precisam ter o mesmo número de elementos.")
-    st.stop()
-
-# Configurar as credenciais de autenticação com emails
-credentials = {
-    "usernames": {
-        usernames[i]: {
-            "name": names[i],
-            "email": emails[i],  # Adicionando email fictício
-            "password": hashed_passwords[i]
-        } for i in range(len(usernames))
-    }
-}
+    credentials = pickle.load(file)
 
 # Criar o objeto de autenticação
 authenticator = stauth.Authenticate(
