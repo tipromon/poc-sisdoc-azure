@@ -73,7 +73,7 @@ st.write(credentials)  # Para fins de debug, exibe o dicionário carregado.
 
 # Criar o objeto de autenticação com as credenciais carregadas
 authenticator = stauth.Authenticate(
-    credentials=credentials,
+    credentials=credentials,   # Acessar o dicionário de credenciais diretamente
     cookie_name="promon_ai_chatbot",
     cookie_key="some_cookie_key",
     cookie_expiry_days=30
@@ -89,6 +89,8 @@ elif authentication_status == None:
     st.warning("Por favor, insira o nome de usuário e a senha")
 else:
     st.success(f"Bem-vindo {name}!")
+
+# Restante do código permanece o mesmo
 
 # Função para carregar índices do Azure AI Search
 def get_available_indexes(search_endpoint, search_key):
