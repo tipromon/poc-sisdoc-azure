@@ -63,12 +63,15 @@ Mantenha clareza, objetividade e relevância em todas as respostas. Garanta que 
 names = ["Peter Parker", "Rebecca Miller", "Michel Daros", "Gustavo Pelissaro", "Alex Sandoval", "Alexsandra Mendes", "Marco Lamim", "Guilherme Grandesi", "Henrique Riego", "Rogerio Ishikawa", "David Andrade", "Fabiana Garcia", "Gabriela Souza", "Andre Hiroshi", "Rafael Pereira", "Gisele Duarte", "Bruna Rufino", "Hellen Vitali", "Rosana Bretzel", "Maria Araújo"]
 usernames = ["pparker", "rmiller", "mdaros", "gpelissaro", "asandoval", "amendes", "mlamim", "ggrandesi", "hriego", "rishikawa", "dandrade", "fgarcia", "gsouza", "ahiroshi", "rpereira", "gduarte", "brufino", "hvitali", "rbretzel", "maraujo"]
 
-# Carregar as senhas hasheadas
+# Carregar o arquivo de senhas hasheadas
 file_path = Path(__file__).parent / "hashed_pw.pkl"
 with file_path.open("rb") as file:
     credentials = pickle.load(file)
 
-# Configurar as credenciais de autenticação diretamente a partir do arquivo pickle carregado
+# Verificar o conteúdo das credenciais para garantir que está no formato correto
+st.write(credentials)  # Para fins de debug, exibe o dicionário carregado.
+
+# Criar o objeto de autenticação com as credenciais carregadas
 authenticator = stauth.Authenticate(
     credentials=credentials,
     cookie_name="promon_ai_chatbot",
@@ -78,6 +81,14 @@ authenticator = stauth.Authenticate(
 
 # Autenticação do usuário
 name, authentication_status, username = authenticator.login("main")
+
+# Verificar o status da autenticação
+if authentication_status == False:
+    st.error("Nome de usuário ou senha incorretos")
+elif authentication_status == None:
+    st.warning("Por favor, insira o nome de usuário e a senha")
+else:
+    st.success(f"Bem-vindo {name}!")
 
 # Função para carregar índices do Azure AI Search
 def get_available_indexes(search_endpoint, search_key):
